@@ -163,6 +163,11 @@ Status HadoopFileSystem::Connect(StringPiece fname, hdfsFS* fs) {
     // configuration files). See:
     // https://github.com/tensorflow/tensorflow/blob/v1.0.0/third_party/hadoop/hdfs.h#L259
     libhdfs()->hdfsBuilderSetNameNode(builder, "default");
+  else if (scheme == "dfs") {
+    size_t length = path.size();
+    StringPiece dfsPath = fname;
+    dfsPath.remove_suffix(length);
+    hdfs_->hdfsBuilderSetNameNode(builder, dfsPath.data());
   } else {
     libhdfs()->hdfsBuilderSetNameNode(builder,
                                       nn.empty() ? "default" : nn.c_str());
@@ -517,5 +522,6 @@ Status HadoopFileSystem::Stat(const string& fname, FileStatistics* stats) {
 
 REGISTER_FILE_SYSTEM("hdfs", HadoopFileSystem);
 REGISTER_FILE_SYSTEM("viewfs", HadoopFileSystem);
+REGISTER_FILE_SYSTEM("dfs", HadoopFileSystem);
 
 }  // namespace tensorflow
